@@ -72,7 +72,6 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
-	"log"
 	"os"
 	"reflect"
 	"sync"
@@ -686,9 +685,7 @@ func Open() (err error) {
 
 	// Open fd for rw mem access; try dev/mem first (need root)
 	file, err = os.OpenFile("/dev/mem", os.O_RDWR|os.O_SYNC, 0)
-	if err != nil { // try gpiomem otherwise (some extra functions like clock and pwm setting wont work)
-		log.Printf("open /dev/mem failed, error: %e", err)
-		log.Printf("try to open /dev/gpiomem...")
+	if os.IsPermission(err) { // try gpiomem otherwise (some extra functions like clock and pwm setting wont work)
 		file, err = os.OpenFile("/dev/gpiomem", os.O_RDWR|os.O_SYNC, 0)
 	}
 	if err != nil {
